@@ -173,7 +173,7 @@ export function ExploreClient() {
               onClick={() => pickQuick(chip.id)}
               className={`rounded-full px-3 py-1.5 text-[13px] font-bold ${
                 active
-                  ? "bg-[var(--ink)] text-white"
+                  ? "bg-[var(--ink)] text-[var(--on-ink)]"
                   : "bg-[var(--surface)] text-[var(--muted)]"
               }`}
             >
@@ -214,7 +214,7 @@ export function ExploreClient() {
                   onClick={() => pickDay(d.key)}
                   className={`flex min-w-[3.1rem] flex-col items-center rounded-2xl px-2 py-2 ${
                     active
-                      ? "bg-[var(--ink)] text-white"
+                      ? "bg-[var(--ink)] text-[var(--on-ink)]"
                       : "bg-[var(--surface)] text-[var(--ink)]"
                   }`}
                 >

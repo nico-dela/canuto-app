@@ -83,7 +83,7 @@ function Segmented<T extends string>({
               onClick={() => onChange(opt.value)}
               className={`rounded-full px-3 py-2 text-[13px] font-bold ${
                 active
-                  ? "bg-[var(--ink)] text-white"
+                  ? "bg-[var(--ink)] text-[var(--on-ink)]"
                   : "bg-[var(--bg)] text-[var(--muted)]"
               }`}
             >
@@ -234,11 +234,6 @@ export function AccessibilityPanel() {
             label="Interfaz simple"
             description="Menos detalles visuales y textos más directos."
           />
-
-          <p className="rounded-2xl bg-[var(--surface)] px-4 py-3 text-[13px] font-semibold leading-snug text-[var(--muted)]">
-            Tip: podés ampliar toda la página con pellizco o Ctrl/Cmd + en el
-            navegador. Canuto no bloquea el zoom.
-          </p>
         </div>
 
         <div className="flex gap-2 border-t border-[var(--line)] px-5 py-4">

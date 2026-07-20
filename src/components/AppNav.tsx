@@ -77,7 +77,7 @@ export function AppNav({ profile }: { profile: Profile | null }) {
               aria-current={pathname === item.href ? "page" : undefined}
               className={`rounded-full px-3 py-1.5 text-[13px] font-bold ${
                 pathname === item.href
-                  ? "bg-[var(--ink)] text-white"
+                  ? "bg-[var(--ink)] text-[var(--on-ink)]"
                   : "text-[var(--muted)] hover:text-[var(--ink)]"
               }`}
             >

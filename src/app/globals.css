@@ -5,6 +5,7 @@
   --bg: #f2f5f8;
   --surface: #ffffff;
   --ink: #1a2838;
+  --on-ink: #ffffff;
   --muted: #5c6b7a;
   --line: #d7e0e9;
   --accent: #e24a30;
@@ -93,7 +94,7 @@ body {
   justify-content: center;
   border: none;
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
   border-radius: 999px;
   padding: 0.8rem 1.2rem;
   font-size: 0.95rem;
@@ -289,6 +290,7 @@ html[data-a11y-contrast="dark"] {
   --bg: #0f1419;
   --surface: #1a222c;
   --ink: #f2f5f8;
+  --on-ink: #0f1419;
   --muted: #b7c2cc;
   --line: #3a4654;
   --accent: #ff7a5c;
@@ -297,11 +299,6 @@ html[data-a11y-contrast="dark"] {
   --background: var(--bg);
   --foreground: var(--ink);
   color-scheme: dark;
-}
-
-html[data-a11y-contrast="dark"] .btn {
-  background: var(--ink);
-  color: var(--bg);
 }
 
 html[data-a11y-contrast="dark"] .btn-accent {

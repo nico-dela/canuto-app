@@ -27,7 +27,7 @@ export function InstallPrompt() {
     <div
       role="dialog"
       aria-label="Instalar Canuto"
-      className="fixed bottom-4 left-3 right-3 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-full bg-[var(--ink)] px-4 py-2.5 text-white"
+      className="fixed bottom-4 left-3 right-3 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-full bg-[var(--ink)] px-4 py-2.5 text-[var(--on-ink)]"
       data-a11y-hide-simple
     >
       <p className="text-[13px] font-bold">¿Instalar?</p>
