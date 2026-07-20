@@ -6,6 +6,12 @@ import { useEffect, useState } from "react";
 import { LoadingState } from "@/components/Loading";
 import { EventMedia } from "@/components/EventMedia";
 import { formatCost, formatWhen } from "@/lib/events/filters";
+import {
+  buildGoogleMapsDirectionsUrl,
+  getCurrentPosition,
+  hasDirectionsTarget,
+  type MapsCoords,
+} from "@/lib/maps";
 import type { CanutoEvent, EventAccessCode, Profile } from "@/lib/types";
 
 function ticketLabel(event: CanutoEvent) {
@@ -21,6 +27,7 @@ export default function EventDetailPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [rsvping, setRsvping] = useState(false);
+  const [openingMaps, setOpeningMaps] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -60,6 +67,34 @@ export default function EventDetailPage() {
     }
   }
 
+  async function openDirections() {
+    if (!event) return;
+    const destination = {
+      lat: event.lat,
+      lng: event.lng,
+      address: event.address,
+    };
+    if (!hasDirectionsTarget(destination)) return;
+
+    setOpeningMaps(true);
+    setMessage("");
+    try {
+      // Pide permiso / activa la ubicación del dispositivo si aún no está
+      let origin: MapsCoords | null = null;
+      try {
+        origin = await getCurrentPosition();
+      } catch {
+        // Sin ubicación: Maps igual abre el destino y pide el origen ahí
+      }
+
+      const url = buildGoogleMapsDirectionsUrl(destination, origin);
+      if (!url) return;
+      window.open(url, "_blank", "noopener,noreferrer");
+    } finally {
+      setOpeningMaps(false);
+    }
+  }
+
   if (error) {
     return (
       <div className="page">
@@ -79,12 +114,11 @@ export default function EventDetailPage() {
     );
   }
 
-  const mapsUrl =
-    event.lat != null && event.lng != null
-      ? `https://www.openstreetmap.org/directions?to=${event.lat}%2C${event.lng}`
-      : event.address
-        ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${event.address}, Córdoba`)}`
-        : null;
+  const canOpenMaps = hasDirectionsTarget({
+    lat: event.lat,
+    lng: event.lng,
+    address: event.address,
+  });
 
   const isPaid = event.cost_type === "pago";
   const isPrivate = event.visibility === "private";
@@ -163,10 +197,15 @@ export default function EventDetailPage() {
             </Link>
           ))}
 
-        {mapsUrl && (
-          <a href={mapsUrl} target="_blank" rel="noreferrer" className="btn-soft">
-            Cómo llegar
-          </a>
+        {canOpenMaps && (
+          <button
+            type="button"
+            className="btn-soft"
+            disabled={openingMaps}
+            onClick={() => void openDirections()}
+          >
+            {openingMaps ? "Abriendo Maps…" : "Cómo llegar"}
+          </button>
         )}
         <button
           type="button"
