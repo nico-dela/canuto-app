@@ -25,6 +25,9 @@ const legible = Lexend({
   variable: "--font-legible",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
+  // Only applied in a11y “fuente legible” — don't preload on every visit
+  preload: false,
+  display: "swap",
 });
 
 export const metadata: Metadata = {
