@@ -30,6 +30,8 @@ export type CanutoEvent = {
   source: EventSource;
   source_url: string | null;
   source_name: string | null;
+  /** Image, GIF, video file, YouTube o Vimeo */
+  cover_url: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -76,6 +78,8 @@ export type CreateEventInput = {
   price?: number;
   /** Link a Passline, Altopocket, etc. (se guarda en source_url) */
   ticket_url?: string;
+  /** Imagen, GIF, video o link de YouTube/Vimeo */
+  cover_url?: string;
   visibility: Visibility;
   codes?: Array<{
     kind: CodeKindId;

@@ -61,6 +61,7 @@ const schema = z
     cost_type: z.enum(["gratis", "a_la_gorra", "pago"]),
     price: z.number().optional(),
     ticket_url: z.string().optional(),
+    cover_url: z.string().optional(),
     visibility: z.enum(["public", "private"]),
     codes: z
       .array(
@@ -73,6 +74,17 @@ const schema = z
       .optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.cover_url?.trim()) {
+      try {
+        new URL(data.cover_url.trim());
+      } catch {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "El link de media no es válido",
+          path: ["cover_url"],
+        });
+      }
+    }
     if (data.cost_type !== "pago") return;
     const url = data.ticket_url?.trim();
     if (!url) {
@@ -107,6 +119,7 @@ export async function POST(request: Request) {
   }
   const input = parsed.data;
   const ticketUrl = input.ticket_url?.trim() || null;
+  const coverUrl = input.cover_url?.trim() || null;
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
@@ -129,6 +142,7 @@ export async function POST(request: Request) {
         source: "organizer",
         source_url: ticketUrl,
         source_name: ticketUrl ? "Entradas" : null,
+        cover_url: coverUrl,
         created_by: profile.id,
       })
       .select("*")

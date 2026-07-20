@@ -41,14 +41,14 @@ export function EventListSkeleton({ count = 4 }: { count?: number }) {
       {Array.from({ length: count }, (_, i) => (
         <div
           key={i}
-          className="flex items-start justify-between gap-3 rounded-2xl bg-[var(--surface)] px-4 py-3"
+          className="flex items-stretch gap-3 rounded-2xl bg-[var(--surface)] p-2 pr-3"
           style={{ animationDelay: `${i * 60}ms` }}
         >
-          <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-[4.5rem] w-[4.5rem] shrink-0 animate-pulse rounded-xl bg-[var(--line)]" />
+          <div className="flex min-w-0 flex-1 flex-col justify-center space-y-2">
             <div className="h-4 w-[72%] animate-pulse rounded-md bg-[var(--line)]" />
             <div className="h-3 w-[40%] animate-pulse rounded-md bg-[var(--line)]" />
           </div>
-          <div className="h-5 w-14 shrink-0 animate-pulse rounded-full bg-[var(--line)]" />
         </div>
       ))}
     </div>

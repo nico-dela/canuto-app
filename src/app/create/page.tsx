@@ -18,6 +18,7 @@ export default function CreateEventPage() {
   const [costType, setCostType] = useState<CostTypeId>("gratis");
   const [price, setPrice] = useState("");
   const [ticketUrl, setTicketUrl] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [codeKind, setCodeKind] = useState<CodeKindId>("permanent");
   const [customCode, setCustomCode] = useState("");
@@ -52,6 +53,7 @@ export default function CreateEventPage() {
       cost_type: costType,
       price: costType === "pago" && price ? Number(price) : undefined,
       ticket_url: costType === "pago" && ticketUrl.trim() ? ticketUrl.trim() : undefined,
+      cover_url: coverUrl.trim() || undefined,
       visibility,
       codes:
         visibility === "private"
@@ -130,6 +132,16 @@ export default function CreateEventPage() {
           rows={3}
           className="input resize-none"
         />
+        <input
+          type="url"
+          value={coverUrl}
+          onChange={(e) => setCoverUrl(e.target.value)}
+          placeholder="Link de imagen, GIF, video o YouTube (opcional)"
+          className="input"
+        />
+        <p className="text-[12px] font-semibold text-[var(--muted)]">
+          Si no ponés media, se muestra una portada genérica según el tipo.
+        </p>
         <label className="block pt-4 text-[12px] text-[var(--muted)]">
           Tipo
           <select

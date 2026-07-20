@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { inferCost, inferType, type ScrapedEvent } from "./normalize";
+import { absoluteMediaUrl, inferCost, inferType, type ScrapedEvent } from "./normalize";
 
 const SOURCE = "https://cultura.cordoba.gob.ar/agenda/";
 const SOURCE_NAME = "Cultura Municipal";
@@ -65,6 +65,13 @@ export async function scrapeMunicipal(): Promise<ScrapedEvent[]> {
     const { cost_type, price } = inferCost(text);
     const starts_at = parseLooseDate(text) ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    const img =
+      block.find("img[src], img[data-src], img[data-lazy-src]").first().attr("src") ||
+      block.find("img").first().attr("data-src") ||
+      block.find("img").first().attr("data-lazy-src") ||
+      block.find("source[srcset]").first().attr("srcset")?.split(/\s+/)[0];
+    const cover_url = absoluteMediaUrl(img, SOURCE);
+
     events.push({
       title: title.slice(0, 180),
       description: text.slice(0, 500),
@@ -76,6 +83,7 @@ export async function scrapeMunicipal(): Promise<ScrapedEvent[]> {
       price,
       source_url: absolute,
       source_name: SOURCE_NAME,
+      cover_url,
     });
   });
 

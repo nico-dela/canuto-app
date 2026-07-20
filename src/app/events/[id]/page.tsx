@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LoadingState } from "@/components/Loading";
+import { EventMedia } from "@/components/EventMedia";
 import { formatCost, formatWhen } from "@/lib/events/filters";
 import type { CanutoEvent, EventAccessCode, Profile } from "@/lib/types";
 
@@ -97,6 +98,15 @@ export default function EventDetailPage() {
       <Link href="/" className="text-[14px] font-bold text-[var(--muted)]">
         ← Planes
       </Link>
+
+      <div className="mt-4">
+        <EventMedia
+          coverUrl={event.cover_url}
+          eventType={event.event_type}
+          title={event.title}
+          size="lg"
+        />
+      </div>
 
       <p className="mt-5 text-[13px] font-extrabold uppercase tracking-[0.14em] text-[var(--accent)]">
         {formatCost(event)}

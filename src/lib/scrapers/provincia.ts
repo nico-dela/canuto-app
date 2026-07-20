@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { inferCost, inferType, type ScrapedEvent } from "./normalize";
+import { absoluteMediaUrl, inferCost, inferType, type ScrapedEvent } from "./normalize";
 
 const SOURCE = "https://cultura.cba.gov.ar/eventos/";
 const SOURCE_NAME = "Agencia Córdoba Cultura";
@@ -41,6 +41,12 @@ export async function scrapeProvincia(): Promise<ScrapedEvent[]> {
       block.find("[datetime]").attr("datetime") ||
       null;
 
+    const img =
+      block.find("img[src], img[data-src]").first().attr("src") ||
+      block.find("img").first().attr("data-src") ||
+      block.find("img").first().attr("data-lazy-src");
+    const cover_url = absoluteMediaUrl(img, SOURCE);
+
     events.push({
       title: title.slice(0, 180),
       description: text.slice(0, 500),
@@ -52,6 +58,7 @@ export async function scrapeProvincia(): Promise<ScrapedEvent[]> {
       price,
       source_url: absolute,
       source_name: SOURCE_NAME,
+      cover_url,
     });
   });
 

@@ -25,6 +25,7 @@ function toEventRow(s: ScrapedEvent) {
     source: "scrape" as const,
     source_url: s.source_url,
     source_name: s.source_name,
+    cover_url: s.cover_url,
   };
 }
 

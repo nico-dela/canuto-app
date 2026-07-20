@@ -9,7 +9,17 @@ export type ScrapedEvent = {
   price: number | null;
   source_url: string;
   source_name: string;
+  cover_url: string | null;
 };
+
+export function absoluteMediaUrl(src: string | undefined, base: string): string | null {
+  if (!src || src.startsWith("data:")) return null;
+  try {
+    return new URL(src, base).toString();
+  } catch {
+    return null;
+  }
+}
 
 export function inferCost(text: string): {
   cost_type: ScrapedEvent["cost_type"];

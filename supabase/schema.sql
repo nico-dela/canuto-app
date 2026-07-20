@@ -47,6 +47,7 @@ create table public.events (
   source public.event_source not null default 'organizer',
   source_url text unique,
   source_name text,
+  cover_url text,
   created_by uuid references public.profiles (id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -293,3 +294,6 @@ end;
 $$;
 
 grant execute on function public.redeem_event_code(text) to authenticated;
+
+-- Upgrade existing DBs:
+-- alter table public.events add column if not exists cover_url text;
