@@ -24,7 +24,12 @@ export function InstallPrompt() {
   if (hidden || !deferred) return null;
 
   return (
-    <div className="fixed bottom-4 left-3 right-3 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-full bg-[var(--ink)] px-4 py-2.5 text-white">
+    <div
+      role="dialog"
+      aria-label="Instalar Canuto"
+      className="fixed bottom-4 left-3 right-3 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-full bg-[var(--ink)] px-4 py-2.5 text-white"
+      data-a11y-hide-simple
+    >
       <p className="text-[13px] font-bold">¿Instalar?</p>
       <div className="flex gap-3 text-[13px] font-bold">
         <button type="button" className="opacity-70" onClick={() => setHidden(true)}>

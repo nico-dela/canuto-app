@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LoadingState } from "@/components/Loading";
 import { CODE_KINDS, COST_TYPES, EVENT_TYPES, CITY } from "@/lib/constants";
 import type { CodeKindId, CostTypeId, EventTypeId } from "@/lib/constants";
 
@@ -16,6 +17,7 @@ export default function CreateEventPage() {
   const [address, setAddress] = useState("");
   const [costType, setCostType] = useState<CostTypeId>("gratis");
   const [price, setPrice] = useState("");
+  const [ticketUrl, setTicketUrl] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [codeKind, setCodeKind] = useState<CodeKindId>("permanent");
   const [customCode, setCustomCode] = useState("");
@@ -49,6 +51,7 @@ export default function CreateEventPage() {
       lng: CITY.lng,
       cost_type: costType,
       price: costType === "pago" && price ? Number(price) : undefined,
+      ticket_url: costType === "pago" && ticketUrl.trim() ? ticketUrl.trim() : undefined,
       visibility,
       codes:
         visibility === "private"
@@ -80,7 +83,11 @@ export default function CreateEventPage() {
   }
 
   if (authed === null) {
-    return <p className="p-6 text-[13px] text-[var(--muted)]">Cargando…</p>;
+    return (
+      <div className="page">
+        <LoadingState label="Cargando…" />
+      </div>
+    );
   }
 
   if (createdCodes.length) {
@@ -168,13 +175,26 @@ export default function CreateEventPage() {
           </select>
         </label>
         {costType === "pago" && (
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="Precio ARS"
-            className="input"
-          />
+          <>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Precio ARS"
+              className="input"
+            />
+            <input
+              type="url"
+              value={ticketUrl}
+              onChange={(e) => setTicketUrl(e.target.value)}
+              placeholder="Link de compra (Passline, Altopocket…)"
+              className="input"
+              required
+            />
+            <p className="text-[12px] font-semibold text-[var(--muted)]">
+              La gente va a ir a ese link para pagar o reservar.
+            </p>
+          </>
         )}
         <fieldset className="space-y-2 pt-4 text-[13px]">
           <legend className="text-[12px] text-[var(--muted)]">Visibilidad</legend>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LoadingState } from "@/components/Loading";
 import { formatWhen } from "@/lib/events/filters";
 import type { CanutoEvent } from "@/lib/types";
 
@@ -32,7 +33,13 @@ export default function MyEventsPage() {
     })();
   }, [router]);
 
-  if (loading) return <p className="p-6 text-[13px] text-[var(--muted)]">Cargando…</p>;
+  if (loading) {
+    return (
+      <div className="page">
+        <LoadingState label="Cargando tus planes…" />
+      </div>
+    );
+  }
 
   function Section({ title, items }: { title: string; items: CanutoEvent[] }) {
     return (

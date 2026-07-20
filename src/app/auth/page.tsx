@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { LoadingState, Spinner } from "@/components/Loading";
 import type { Profile } from "@/lib/types";
 
 function AuthForm() {
@@ -16,6 +17,8 @@ function AuthForm() {
   const [error, setError] = useState("");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [dataMode, setDataMode] = useState("");
+  const [ready, setReady] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -23,30 +26,44 @@ function AuthForm() {
       const data = await res.json();
       setProfile(data.profile);
       setDataMode(data.mode);
+      setReady(true);
     })();
   }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode, email, password, displayName }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Error");
-      return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode, email, password, displayName }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Error");
+        return;
+      }
+      router.push(next);
+      router.refresh();
+    } finally {
+      setSubmitting(false);
     }
-    router.push(next);
-    router.refresh();
   }
 
   async function logout() {
     await fetch("/api/auth", { method: "DELETE" });
     setProfile(null);
     router.refresh();
+  }
+
+  if (!ready) {
+    return (
+      <div className="page">
+        <LoadingState />
+      </div>
+    );
   }
 
   if (profile) {
@@ -105,8 +122,17 @@ function AuthForm() {
           className="input"
         />
         {error && <p className="text-[14px] font-bold text-[var(--accent)]">{error}</p>}
-        <button type="submit" className="btn btn-accent w-full">
-          {mode === "login" ? "Entrar" : "Crear cuenta"}
+        <button type="submit" disabled={submitting} className="btn btn-accent w-full gap-2">
+          {submitting ? (
+            <>
+              <Spinner size="sm" onDark />
+              {mode === "login" ? "Entrando…" : "Creando…"}
+            </>
+          ) : mode === "login" ? (
+            "Entrar"
+          ) : (
+            "Crear cuenta"
+          )}
         </button>
       </form>
       <button
@@ -122,7 +148,13 @@ function AuthForm() {
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<p className="p-6 text-[14px] font-semibold text-[var(--muted)]">Cargando…</p>}>
+    <Suspense
+      fallback={
+        <div className="page">
+          <LoadingState />
+        </div>
+      }
+    >
       <AuthForm />
     </Suspense>
   );

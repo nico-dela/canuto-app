@@ -74,6 +74,8 @@ export type CreateEventInput = {
   address?: string;
   cost_type: CostTypeId;
   price?: number;
+  /** Link a Passline, Altopocket, etc. (se guarda en source_url) */
+  ticket_url?: string;
   visibility: Visibility;
   codes?: Array<{
     kind: CodeKindId;

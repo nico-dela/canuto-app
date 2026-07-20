@@ -6,24 +6,31 @@ import type { CanutoEvent } from "@/lib/types";
 
 export function EventCard({
   event,
+  selected,
 }: {
   event: CanutoEvent;
   selected?: boolean;
   onSelect?: (id: string) => void;
   index?: number;
 }) {
+  const when = formatWhen(event.starts_at);
+  const cost = formatCost(event);
+
   return (
     <Link
       href={`/events/${event.id}`}
-      className="flex items-start justify-between gap-3 rounded-2xl bg-white px-4 py-3 active:bg-[var(--line)]"
+      data-a11y-hit
+      aria-label={`${event.title}. ${when}. ${cost}`}
+      aria-current={selected ? "true" : undefined}
+      className={`flex items-start justify-between gap-3 rounded-2xl bg-[var(--surface)] px-4 py-3 active:bg-[var(--line)] ${
+        selected ? "ring-2 ring-[var(--accent)]" : ""
+      }`}
     >
       <div className="min-w-0">
         <h3 className="truncate text-[15px] font-bold leading-snug text-[var(--ink)]">
           {event.title}
         </h3>
-        <p className="mt-1 text-[12px] font-semibold text-[var(--muted)]">
-          {formatWhen(event.starts_at)}
-        </p>
+        <p className="mt-1 text-[12px] font-semibold text-[var(--muted)]">{when}</p>
       </div>
       <span
         className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
@@ -34,7 +41,7 @@ export function EventCard({
               : "bg-[var(--accent-soft)] text-[var(--accent)]"
         }`}
       >
-        {formatCost(event)}
+        {cost}
       </span>
     </Link>
   );

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { Spinner } from "@/components/Loading";
 
 export default function UnlockPage() {
   const router = useRouter();
@@ -55,8 +56,15 @@ export default function UnlockPage() {
           required
         />
         {error && <p className="text-[14px] font-bold text-[var(--accent)]">{error}</p>}
-        <button type="submit" disabled={loading} className="btn btn-accent w-full">
-          {loading ? "Abriendo…" : "Abrir plan"}
+        <button type="submit" disabled={loading} className="btn btn-accent w-full gap-2">
+          {loading ? (
+            <>
+              <Spinner size="sm" onDark />
+              Abriendo…
+            </>
+          ) : (
+            "Abrir plan"
+          )}
         </button>
       </form>
       <Link href="/" className="mt-8 inline-block text-[14px] font-bold link">
