@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { signLocalSession, verifyLocalSession } from "@/lib/local-session";
 import { SEED_EVENTS } from "./seed";
 import type {
   CanutoEvent,
@@ -14,7 +15,6 @@ type LocalDb = {
   unlocks: Array<{ user_id: string; event_id: string; unlocked_at: string }>;
   rsvps: Rsvp[];
   profiles: Profile[];
-  sessions: Map<string, string>; // token -> userId
 };
 
 declare global {
@@ -47,7 +47,6 @@ function db(): LocalDb {
           email: "admin@canuto.local",
         },
       ],
-      sessions: new Map(),
     };
 
     // Demo private event
@@ -252,22 +251,20 @@ export const localStore = {
     return db().codes.filter((c) => c.event_id === eventId);
   },
 
-  // Auth helpers for local mode
+  // Auth helpers for local mode (token is signed — survives serverless cold starts)
   register(email: string, password: string, displayName: string): { token: string; profile: Profile } {
     void password;
     let profile = db().profiles.find((p) => p.email === email);
     if (!profile) {
       profile = {
-        id: randomUUID(),
+        id: email === "admin@canuto.local" ? "local-admin" : randomUUID(),
         display_name: displayName || email.split("@")[0],
         role: email === "admin@canuto.local" ? "admin" : "user",
         email,
       };
       db().profiles.push(profile);
     }
-    const token = randomUUID();
-    db().sessions.set(token, profile.id);
-    return { token, profile };
+    return { token: signLocalSession(profile), profile };
   },
 
   login(email: string, password: string): { token: string; profile: Profile } {
@@ -276,16 +273,11 @@ export const localStore = {
     if (!profile) {
       return this.register(email, password, email.split("@")[0]);
     }
-    const token = randomUUID();
-    db().sessions.set(token, profile.id);
-    return { token, profile };
+    return { token: signLocalSession(profile), profile };
   },
 
   sessionUser(token?: string | null): Profile | null {
-    if (!token) return null;
-    const userId = db().sessions.get(token);
-    if (!userId) return null;
-    return db().profiles.find((p) => p.id === userId) ?? null;
+    return verifyLocalSession(token);
   },
 
   getProfile(userId: string) {
