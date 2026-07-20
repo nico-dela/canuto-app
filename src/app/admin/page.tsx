@@ -65,7 +65,9 @@ export default function AdminPage() {
       <p className="page-sub">Aprobar o rechazar públicos pendientes.</p>
 
       <div className="mt-8 border-y border-[var(--line)] py-4">
-        <p className="text-[13px] text-[var(--muted)]">Scrapers Córdoba</p>
+        <p className="text-[13px] text-[var(--muted)]">
+          Scrapers Córdoba (municipal, provincia, Eventbrite, Meetup, Fever)
+        </p>
         <button type="button" onClick={() => void runScrape()} className="btn mt-3">
           Correr scrapers
         </button>

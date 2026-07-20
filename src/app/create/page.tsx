@@ -199,7 +199,7 @@ export default function CreateEventPage() {
               type="url"
               value={ticketUrl}
               onChange={(e) => setTicketUrl(e.target.value)}
-              placeholder="Link de compra (Passline, Altopocket…)"
+              placeholder="Link de compra (Passline, Eventbrite, Altopocket…)"
               className="input"
               required
             />

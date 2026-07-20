@@ -33,10 +33,15 @@ Abrí [http://localhost:3000](http://localhost:3000).
 
 ## Scrapers
 
-Fuentes v1:
+Fuentes actuales (Córdoba Capital):
 
 - https://cultura.cordoba.gob.ar/agenda/ (prioridad; scrapeable)
 - https://cultura.cba.gov.ar/eventos/ (puede devolver 403 desde algunos IPs/CloudFront; el job no falla: registra el error y sigue)
+- https://www.eventbrite.com.ar/d/argentina--córdoba/events/
+- https://www.meetup.com/find/?location=ar--cordoba&source=EVENTS
+- https://feverup.com/es/cordoba-argentina (experiencias / conciertos)
+
+Fuera del scrape automático por ahora: Instagram (ToS/API), Passline (anti-bot / queue), Facebook Events.
 
 ```bash
 # desde la UI admin, o:
@@ -45,8 +50,6 @@ curl -X POST http://localhost:3000/api/scrape
 
 npm run scrape
 ```
-
-Instagram queda fuera del MVP automático (ToS/API).
 
 ## Scripts
 

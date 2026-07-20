@@ -1,5 +1,8 @@
 import { scrapeMunicipal } from "./municipal";
 import { scrapeProvincia } from "./provincia";
+import { scrapeEventbrite } from "./eventbrite";
+import { scrapeMeetup } from "./meetup";
+import { scrapeFever } from "./fever";
 import { guessCoords, type ScrapedEvent } from "./normalize";
 import { localStore } from "@/lib/events/local-store";
 import { hasServiceRole, isSupabaseConfigured } from "@/lib/supabase/config";
@@ -8,7 +11,13 @@ import type { CanutoEvent } from "@/lib/types";
 import type { CostTypeId, EventTypeId } from "@/lib/constants";
 
 function toEventRow(s: ScrapedEvent) {
-  const coords = guessCoords(s.address);
+  const coords =
+    s.lat != null &&
+    s.lng != null &&
+    Number.isFinite(s.lat) &&
+    Number.isFinite(s.lng)
+      ? { lat: s.lat, lng: s.lng }
+      : guessCoords(s.address);
   return {
     title: s.title,
     description: s.description,
@@ -29,6 +38,17 @@ function toEventRow(s: ScrapedEvent) {
   };
 }
 
+const SCRAPERS: Array<{
+  source: string;
+  run: () => Promise<ScrapedEvent[]>;
+}> = [
+  { source: "cultura.cordoba.gob.ar", run: scrapeMunicipal },
+  { source: "cultura.cba.gov.ar", run: scrapeProvincia },
+  { source: "eventbrite.com.ar", run: scrapeEventbrite },
+  { source: "meetup.com", run: scrapeMeetup },
+  { source: "feverup.com", run: scrapeFever },
+];
+
 export async function runScrapers() {
   const results: Array<{
     source: string;
@@ -38,46 +58,30 @@ export async function runScrapers() {
     upserted: number;
   }> = [];
 
-  let municipal: ScrapedEvent[] = [];
-  let provincia: ScrapedEvent[] = [];
+  const collected: ScrapedEvent[] = [];
 
-  try {
-    municipal = await scrapeMunicipal();
-    results.push({
-      source: "cultura.cordoba.gob.ar",
-      ok: true,
-      fetched: municipal.length,
-      upserted: 0,
-    });
-  } catch (e) {
-    results.push({
-      source: "cultura.cordoba.gob.ar",
-      ok: false,
-      message: e instanceof Error ? e.message : "error",
-      fetched: 0,
-      upserted: 0,
-    });
+  for (const scraper of SCRAPERS) {
+    try {
+      const events = await scraper.run();
+      collected.push(...events);
+      results.push({
+        source: scraper.source,
+        ok: true,
+        fetched: events.length,
+        upserted: 0,
+      });
+    } catch (e) {
+      results.push({
+        source: scraper.source,
+        ok: false,
+        message: e instanceof Error ? e.message : "error",
+        fetched: 0,
+        upserted: 0,
+      });
+    }
   }
 
-  try {
-    provincia = await scrapeProvincia();
-    results.push({
-      source: "cultura.cba.gov.ar",
-      ok: true,
-      fetched: provincia.length,
-      upserted: 0,
-    });
-  } catch (e) {
-    results.push({
-      source: "cultura.cba.gov.ar",
-      ok: false,
-      message: e instanceof Error ? e.message : "error",
-      fetched: 0,
-      upserted: 0,
-    });
-  }
-
-  const all = [...municipal, ...provincia].map(toEventRow);
+  const all = collected.map(toEventRow);
 
   if (isSupabaseConfigured() && hasServiceRole()) {
     const supabase = createServiceClient();
@@ -88,8 +92,9 @@ export async function runScrapers() {
       });
       if (!error) upserted += 1;
     }
+    const okCount = results.filter((x) => x.ok).length || 1;
     for (const r of results) {
-      if (r.ok) r.upserted = Math.round(upserted / results.filter((x) => x.ok).length);
+      if (r.ok) r.upserted = Math.round(upserted / okCount);
       await supabase.from("scrape_runs").insert({
         source: r.source,
         ok: r.ok,
