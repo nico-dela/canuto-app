@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 import { runScrapers } from "@/lib/scrapers/run";
+import { isScrapeBearerAuthorized } from "@/lib/scrapers/auth";
 import { getCurrentProfile } from "@/lib/auth";
+
+/** Scrapers can exceed default serverless limits; raise on Pro if needed. */
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.SCRAPE_SECRET;
   const profile = await getCurrentProfile();
 
   const authorized =
-    (cronSecret && authHeader === `Bearer ${cronSecret}`) || profile?.role === "admin";
+    isScrapeBearerAuthorized(authHeader, [
+      process.env.SCRAPE_SECRET,
+      process.env.CRON_SECRET,
+    ]) || profile?.role === "admin";
 
   if (!authorized) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });

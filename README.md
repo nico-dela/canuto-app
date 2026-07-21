@@ -41,14 +41,32 @@ Fuentes actuales (Córdoba Capital):
 - https://www.meetup.com/find/?location=ar--cordoba&source=EVENTS
 - https://feverup.com/es/cordoba-argentina (experiencias / conciertos)
 
-Fuera del scrape automático por ahora: Instagram (ToS/API), Passline (anti-bot / queue), Facebook Events.
+Fuera del scrape automático por defecto: Passline (anti-bot / queue), Facebook Events.
+
+**Instagram (experimental, opt-in):** agendas culturales en flyers de perfiles públicos. Activá con `INSTAGRAM_SCRAPE_ENABLED=true`, perfiles en `INSTAGRAM_PROFILES`, y opcionalmente `INSTAGRAM_SESSIONID` (cookie de sesión propia; Instagram suele bloquear anónimo). Corre OCR (`tesseract.js`) sobre las imágenes, parsea candidatos y los upserta como `pending` para revisión en `/admin`. Fragil y contra ToS de Instagram — no usar en cron sin supervisión.
 
 ```bash
 # desde la UI admin, o:
-curl -X POST http://localhost:3000/api/scrape
-# (requiere sesión admin o header Authorization: Bearer $SCRAPE_SECRET)
+./scripts/trigger-scrape.sh
+# (requiere SCRAPE_SECRET en .env.local)
 
+# CLI in-process (útil con Supabase; en demo la memoria no es la del `next dev`):
 npm run scrape
+```
+
+### Cron automático (cada 6 h)
+
+**Vercel:** [`vercel.json`](vercel.json) dispara `GET /api/scrape` cada 6 horas. En el proyecto de Vercel definí `SCRAPE_SECRET` y `CRON_SECRET` con el **mismo** valor (Vercel Cron manda `Authorization: Bearer $CRON_SECRET`).
+
+- Plan **Pro**: el schedule `0 */6 * * *` aplica.
+- Plan **Hobby**: solo 1 cron/día — cambiá el schedule a `0 15 * * *` (15:00 UTC ≈ mediodía AR) o upgradé.
+
+**Local** (app corriendo con `npm run dev` o `npm start`):
+
+```bash
+chmod +x scripts/trigger-scrape.sh
+# crontab -e  → cada 6 horas:
+0 */6 * * * cd /ruta/a/canuto-app && ./scripts/trigger-scrape.sh >> /tmp/canuto-scrape.log 2>&1
 ```
 
 ## Scripts
@@ -59,7 +77,9 @@ npm run scrape
 | `npm run build` | Build producción (+ SW) |
 | `npm run start` | Servir build |
 | `npm run scrape` | Correr scrapers por CLI |
+| `npm run scrape:trigger` | POST a `/api/scrape` (server local/remoto) |
 | `npm run lint` | ESLint |
+| `npm test` | Tests (node:test) |
 
 ## Pantallas
 

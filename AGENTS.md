@@ -92,7 +92,7 @@ Verificar:
 - RLS y políticas en `supabase/schema.sql` coherentes con el acceso en código
 - Códigos privados / unlock: no filtrar eventos privados sin unlock válido
 - Errores seguros: no filtrar datos sensibles en logs ni respuestas
-- Scrapers: no persistir PII innecesaria; respetar límites/ToS de fuentes (Instagram fuera del MVP automático)
+- Scrapers: no persistir PII innecesaria; respetar límites/ToS de fuentes (Instagram solo opt-in experimental vía `INSTAGRAM_SCRAPE_ENABLED`, no en el MVP automático)
 
 Si las implicaciones de seguridad no están claras, el código DEBE rechazarse.
 
@@ -230,6 +230,6 @@ El código generado por LLM solo es aceptable cuando:
 - Sin `.env.local` de Supabase → modo demo; no asumir DB remota.
 - Admin demo: `admin@canuto.local`; código privado de prueba: `AMIGOS26`.
 - Scrapers: cultura municipal (prioridad); provincia puede 403 — no fallar el job entero.
-- Instagram no entra en el MVP automático.
+- Instagram no entra en el MVP automático; scraper experimental opt-in (`INSTAGRAM_SCRAPE_ENABLED`) con eventos `pending` para moderación.
 - Cambios de schema → actualizar `supabase/schema.sql` y documentar en el PR.
 - UI y copy orientados a español (Córdoba Capital).

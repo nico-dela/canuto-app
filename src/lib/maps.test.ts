@@ -6,19 +6,29 @@ import {
 } from "./maps";
 
 describe("buildGoogleMapsDirectionsUrl", () => {
-  it("builds origin + destination without travelmode", () => {
-    const url = buildGoogleMapsDirectionsUrl(
-      { lat: -31.42, lng: -64.18 },
-      { lat: -31.4, lng: -64.2 },
-    );
+  it("builds destination-only URL without origin or travelmode", () => {
+    const url = buildGoogleMapsDirectionsUrl({ lat: -31.42, lng: -64.18 });
     assert.ok(url);
     const parsed = new URL(url!);
     assert.equal(parsed.origin, "https://www.google.com");
     assert.equal(parsed.pathname, "/maps/dir/");
     assert.equal(parsed.searchParams.get("api"), "1");
-    assert.equal(parsed.searchParams.get("origin"), "-31.4,-64.2");
     assert.equal(parsed.searchParams.get("destination"), "-31.42,-64.18");
+    assert.equal(parsed.searchParams.get("origin"), null);
     assert.equal(parsed.searchParams.get("travelmode"), null);
+  });
+
+  it("prefers address over coords so Maps matches the event label", () => {
+    const url = buildGoogleMapsDirectionsUrl({
+      lat: -31.4295,
+      lng: -64.1882,
+      address: "Parque Las Heras",
+    });
+    assert.ok(url);
+    assert.equal(
+      new URL(url!).searchParams.get("destination"),
+      "Parque Las Heras, Córdoba",
+    );
   });
 
   it("uses address when coords are missing", () => {

@@ -3,6 +3,7 @@ import { scrapeProvincia } from "./provincia";
 import { scrapeEventbrite } from "./eventbrite";
 import { scrapeMeetup } from "./meetup";
 import { scrapeFever } from "./fever";
+import { isInstagramScrapeEnabled } from "./instagram/config";
 import { guessCoords, type ScrapedEvent } from "./normalize";
 import { localStore } from "@/lib/events/local-store";
 import { hasServiceRole, isSupabaseConfigured } from "@/lib/supabase/config";
@@ -30,7 +31,7 @@ function toEventRow(s: ScrapedEvent) {
     cost_type: s.cost_type as CostTypeId,
     price: s.price,
     visibility: "public" as const,
-    status: "approved" as const,
+    status: (s.status ?? "approved") as "pending" | "approved",
     source: "scrape" as const,
     source_url: s.source_url,
     source_name: s.source_name,
@@ -38,16 +39,31 @@ function toEventRow(s: ScrapedEvent) {
   };
 }
 
-const SCRAPERS: Array<{
+function buildScrapers(): Array<{
   source: string;
   run: () => Promise<ScrapedEvent[]>;
-}> = [
-  { source: "cultura.cordoba.gob.ar", run: scrapeMunicipal },
-  { source: "cultura.cba.gov.ar", run: scrapeProvincia },
-  { source: "eventbrite.com.ar", run: scrapeEventbrite },
-  { source: "meetup.com", run: scrapeMeetup },
-  { source: "feverup.com", run: scrapeFever },
-];
+}> {
+  const list: Array<{
+    source: string;
+    run: () => Promise<ScrapedEvent[]>;
+  }> = [
+    { source: "cultura.cordoba.gob.ar", run: scrapeMunicipal },
+    { source: "cultura.cba.gov.ar", run: scrapeProvincia },
+    { source: "eventbrite.com.ar", run: scrapeEventbrite },
+    { source: "meetup.com", run: scrapeMeetup },
+    { source: "feverup.com", run: scrapeFever },
+  ];
+  if (isInstagramScrapeEnabled()) {
+    list.push({
+      source: "instagram.com",
+      run: async () => {
+        const { scrapeInstagram } = await import("./instagram");
+        return scrapeInstagram();
+      },
+    });
+  }
+  return list;
+}
 
 export async function runScrapers() {
   const results: Array<{
@@ -60,7 +76,7 @@ export async function runScrapers() {
 
   const collected: ScrapedEvent[] = [];
 
-  for (const scraper of SCRAPERS) {
+  for (const scraper of buildScrapers()) {
     try {
       const events = await scraper.run();
       collected.push(...events);

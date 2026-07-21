@@ -8,11 +8,9 @@ import { EventMedia } from "@/components/EventMedia";
 import { formatCost, formatWhen } from "@/lib/events/filters";
 import {
   buildGoogleMapsDirectionsUrl,
-  getCurrentPosition,
   hasDirectionsTarget,
-  type MapsCoords,
 } from "@/lib/maps";
-import type { CanutoEvent, EventAccessCode, Profile } from "@/lib/types";
+import type { CanutoEvent, EventAccessCode } from "@/lib/types";
 
 function ticketLabel(event: CanutoEvent) {
   if (event.source === "scrape") return "Ver entradas";
@@ -23,77 +21,21 @@ export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
   const [event, setEvent] = useState<CanutoEvent | null>(null);
   const [codes, setCodes] = useState<EventAccessCode[] | undefined>();
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [rsvping, setRsvping] = useState(false);
-  const [openingMaps, setOpeningMaps] = useState(false);
 
   useEffect(() => {
     void (async () => {
-      const [evRes, meRes] = await Promise.all([
-        fetch(`/api/events/${params.id}`),
-        fetch("/api/auth"),
-      ]);
+      const evRes = await fetch(`/api/events/${params.id}`);
       const evData = await evRes.json();
-      const meData = await meRes.json();
       if (!evRes.ok) {
         setError(evData.error || "No encontrado");
         return;
       }
       setEvent(evData.event);
       setCodes(evData.codes);
-      setProfile(meData.profile);
     })();
   }, [params.id]);
-
-  async function rsvp() {
-    setMessage("");
-    setRsvping(true);
-    try {
-      const res = await fetch(`/api/events/${params.id}/rsvp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "going" }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setMessage(data.error || "Error");
-        return;
-      }
-      setMessage("¡Listo, confirmaste que vas!");
-    } finally {
-      setRsvping(false);
-    }
-  }
-
-  async function openDirections() {
-    if (!event) return;
-    const destination = {
-      lat: event.lat,
-      lng: event.lng,
-      address: event.address,
-    };
-    if (!hasDirectionsTarget(destination)) return;
-
-    setOpeningMaps(true);
-    setMessage("");
-    try {
-      // Pide permiso / activa la ubicación del dispositivo si aún no está
-      let origin: MapsCoords | null = null;
-      try {
-        origin = await getCurrentPosition();
-      } catch {
-        // Sin ubicación: Maps igual abre el destino y pide el origen ahí
-      }
-
-      const url = buildGoogleMapsDirectionsUrl(destination, origin);
-      if (!url) return;
-      window.open(url, "_blank", "noopener,noreferrer");
-    } finally {
-      setOpeningMaps(false);
-    }
-  }
 
   if (error) {
     return (
@@ -114,6 +56,11 @@ export default function EventDetailPage() {
     );
   }
 
+  const mapsUrl = buildGoogleMapsDirectionsUrl({
+    lat: event.lat,
+    lng: event.lng,
+    address: event.address,
+  });
   const canOpenMaps = hasDirectionsTarget({
     lat: event.lat,
     lng: event.lng,
@@ -124,8 +71,6 @@ export default function EventDetailPage() {
   const isPrivate = event.visibility === "private";
   const ticketUrl = event.source_url;
   const showTicket = isPaid && Boolean(ticketUrl);
-  const showRsvp = isPrivate;
-  const authNext = `/auth?next=${encodeURIComponent(`/events/${event.id}`)}`;
 
   return (
     <div className="page">
@@ -178,34 +123,15 @@ export default function EventDetailPage() {
           </p>
         )}
 
-        {showRsvp &&
-          (profile ? (
-            <button
-              type="button"
-              onClick={() => void rsvp()}
-              disabled={rsvping}
-              className={`btn ${showTicket ? "btn-soft" : "btn-accent"}`}
-            >
-              {rsvping ? "Confirmando…" : "Voy"}
-            </button>
-          ) : (
-            <Link
-              href={authNext}
-              className={`btn ${showTicket ? "btn-soft" : "btn-accent"}`}
-            >
-              Entrar para confirmar
-            </Link>
-          ))}
-
-        {canOpenMaps && (
-          <button
-            type="button"
+        {canOpenMaps && mapsUrl && (
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-soft"
-            disabled={openingMaps}
-            onClick={() => void openDirections()}
           >
-            {openingMaps ? "Abriendo Maps…" : "Cómo llegar"}
-          </button>
+            Cómo llegar
+          </a>
         )}
         <button
           type="button"

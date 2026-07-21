@@ -13,6 +13,8 @@ export type ScrapedEvent = {
   source_url: string;
   source_name: string;
   cover_url: string | null;
+  /** Instagram OCR candidates use pending; other scrapers default to approved. */
+  status?: "pending" | "approved";
 };
 
 export const SCRAPER_UA =
@@ -167,7 +169,7 @@ export async function geocodeAddress(
 /** Rough Córdoba venue fallbacks */
 export const VENUE_COORDS: Record<string, { lat: number; lng: number }> = {
   "teatro comedia": { lat: -31.4167, lng: -64.1833 },
-  "parque las heras": { lat: -31.4295, lng: -64.1882 },
+  "parque las heras": { lat: -31.4056, lng: -64.1848 },
   "museo juan de tejeda": { lat: -31.4189, lng: -64.1865 },
   "centro cultural córdoba": { lat: -31.4286, lng: -64.184 },
   cabildo: { lat: -31.4168, lng: -64.1836 },
