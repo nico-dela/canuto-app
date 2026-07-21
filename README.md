@@ -56,10 +56,10 @@ npm run scrape
 
 ### Cron automático (cada 6 h)
 
-**Vercel:** [`vercel.json`](vercel.json) dispara `GET /api/scrape` cada 6 horas. En el proyecto de Vercel definí `SCRAPE_SECRET` y `CRON_SECRET` con el **mismo** valor (Vercel Cron manda `Authorization: Bearer $CRON_SECRET`).
+**Vercel:** [`vercel.json`](vercel.json) dispara `GET /api/scrape` **1× al día** a las 15:00 UTC (≈ mediodía AR). En el proyecto definí `SCRAPE_SECRET` y `CRON_SECRET` con el **mismo** valor (Vercel Cron manda `Authorization: Bearer $CRON_SECRET`).
 
-- Plan **Pro**: el schedule `0 */6 * * *` aplica.
-- Plan **Hobby**: solo 1 cron/día — cambiá el schedule a `0 15 * * *` (15:00 UTC ≈ mediodía AR) o upgradé.
+- Plan **Hobby** (actual): máximo 1 cron/día — el schedule ya está en `0 15 * * *`.
+- Plan **Pro**: podés subir a `0 */6 * * *` (cada 6 h).
 
 **Local** (app corriendo con `npm run dev` o `npm start`):
 
