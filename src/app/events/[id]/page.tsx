@@ -7,6 +7,10 @@ import { LoadingState } from "@/components/Loading";
 import { EventMedia } from "@/components/EventMedia";
 import { formatCost, formatWhen } from "@/lib/events/filters";
 import {
+  eventSourceDetailCta,
+  eventSourceHref,
+} from "@/lib/events/source-link";
+import {
   buildGoogleMapsDirectionsUrl,
   hasDirectionsTarget,
 } from "@/lib/maps";
@@ -71,6 +75,8 @@ export default function EventDetailPage() {
   const isPrivate = event.visibility === "private";
   const ticketUrl = event.source_url;
   const showTicket = isPaid && Boolean(ticketUrl);
+  const sourceHref = eventSourceHref(event);
+  const sourceCta = eventSourceDetailCta(event);
 
   return (
     <div className="page">
@@ -123,6 +129,17 @@ export default function EventDetailPage() {
           </p>
         )}
 
+        {sourceCta && (
+          <a
+            href={sourceCta.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-soft"
+          >
+            {sourceCta.label}
+          </a>
+        )}
+
         {canOpenMaps && mapsUrl && (
           <a
             href={mapsUrl}
@@ -154,9 +171,21 @@ export default function EventDetailPage() {
         <p className="mt-4 text-center text-[14px] font-bold text-[var(--good)]">{message}</p>
       )}
 
-      {event.source_name && event.source === "scrape" && (
+      {event.source === "scrape" && event.source_name && (
         <p className="mt-8 text-[12px] font-semibold text-[var(--muted)]">
-          Fuente: {event.source_name}
+          Fuente:{" "}
+          {sourceHref ? (
+            <a
+              href={sourceHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-[var(--muted)]/40 underline-offset-2 hover:text-[var(--ink)]"
+            >
+              {event.source_name}
+            </a>
+          ) : (
+            event.source_name
+          )}
         </p>
       )}
 
