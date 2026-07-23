@@ -171,24 +171,6 @@ export default function EventDetailPage() {
         <p className="mt-4 text-center text-[14px] font-bold text-[var(--good)]">{message}</p>
       )}
 
-      {event.source === "scrape" && event.source_name && (
-        <p className="mt-8 text-[12px] font-semibold text-[var(--muted)]">
-          Fuente:{" "}
-          {sourceHref ? (
-            <a
-              href={sourceHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline decoration-[var(--muted)]/40 underline-offset-2 hover:text-[var(--ink)]"
-            >
-              {event.source_name}
-            </a>
-          ) : (
-            event.source_name
-          )}
-        </p>
-      )}
-
       {codes && codes.length > 0 && (
         <div className="mt-8 rounded-3xl bg-[var(--surface)] p-5 shadow-[0_10px_30px_rgba(26,40,56,0.06)]">
           <p className="text-[13px] font-extrabold uppercase tracking-wide text-[var(--muted)]">
